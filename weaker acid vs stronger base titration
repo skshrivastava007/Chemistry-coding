@@ -1,0 +1,45 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+Ka = 1.8e-5          # Acetic acid dissociation constant
+pKa = -np.log10(Ka)
+C_acid = 0.1          # Molarity of acetic acid (mol/L)
+C_base = 0.1          # Molarity of NaOH (mol/L)
+V_acid = 25.0         # Volume of acid (mL)
+V_base = np.linspace(0, 40, 400)  # Volume of NaOH added (mL)
+
+# Function to calculate pH
+def calculate_pH(Vb):
+    n_acid = C_acid * V_acid / 1000
+    n_base = C_base * Vb / 1000
+
+    if n_base < n_acid:  # Before equivalence point
+        n_HA = n_acid - n_base
+        n_A = n_base
+        pH = pKa + np.log10(n_A / n_HA)
+    elif n_base == n_acid:  # At equivalence point
+        C_A = n_acid / ((V_acid + Vb) / 1000)
+        Kb = 1e-14 / Ka
+        OH = np.sqrt(Kb * C_A)
+        pH = 14 + np.log10(OH)
+    else:  # After equivalence point
+        excess_OH = (n_base - n_acid) / ((V_acid + Vb) / 1000)
+        pH = 14 + np.log10(excess_OH)
+    return pH
+
+# Compute pH values
+pH_values = [calculate_pH(v) for v in V_base]
+
+# Plot
+plt.figure(figsize=(8, 5))
+plt.plot(V_base, pH_values, color='blue', lw=2)
+plt.axvline(x=12.5, color='green', linestyle='--', label='Half-equivalence (pH = pKa)')
+plt.axvline(x=25, color='red', linestyle='--', label='Equivalence Point (pH > 7)')
+plt.title('Titration of Acetic Acid with NaOH')
+plt.xlabel('Volume of NaOH added (mL)')
+plt.ylabel('pH')
+plt.ylim(3, 12)
+plt.legend()
+plt.grid(True)
+plt.show()
