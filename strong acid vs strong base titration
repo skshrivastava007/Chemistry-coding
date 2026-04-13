@@ -1,0 +1,52 @@
+# Imports
+import numpy as np
+import matplotlib.pyplot as plt
+import io
+import base64
+import IPython.display as display
+
+# --- Constants and Initial Conditions ---
+Kw = 1e-14  # Water dissociation constant
+V_a = 50.0  # Initial volume of acid (mL)
+C_a = 10**(-0.5)  # Initial concentration of acid (M), adjusted for pH 0.5
+C_b = 0.5  # Concentration of base (M), adjusted as per request
+
+# --- Titration Simulation ---
+# Create an array of base volumes added
+V_b = np.linspace(0, 100, 200)  # Volume of base added (mL), covering before, at, and after equivalence
+
+# Calculate moles of H+ and OH- at each point
+moles_H_plus = (V_a * C_a / 1000) - (V_b * C_b / 1000)
+moles_OH_minus = (V_b * C_b / 1000) - (V_a * C_a / 1000)
+
+# Calculate total volume in liters
+total_volume_L = (V_a + V_b) / 1000
+
+# --- pH Calculation ---
+pH_values = []
+for i in range(len(V_b)):
+    if moles_H_plus[i] > 0:  # Acidic region
+        H_plus_concentration = moles_H_plus[i] / total_volume_L[i]
+        pH = -np.log10(H_plus_concentration)
+    elif moles_OH_minus[i] > 0:  # Basic region
+        OH_minus_concentration = moles_OH_minus[i] / total_volume_L[i]
+        pOH = -np.log10(OH_minus_concentration)
+        pH = 14 - pOH
+    else:  # Equivalence point
+        pH = 7.0
+    pH_values.append(pH)
+# --- Plotting the Titration Curve ---
+fig = plt.figure(figsize=(8, 6), facecolor='w') # Adjusted figure size
+plt.plot(V_b, pH_values, label='Titration Curve')
+plt.xlabel('Volume of Base Added (mL)')
+plt.ylabel('pH')
+plt.title('Strong Acid vs. Strong Base Titration Curve')
+plt.grid(True)
+plt.legend()
+
+data = io.BytesIO()
+plt.savefig(data)
+image = F"data:image/png;base64,{base64.b64encode(data.getvalue()).decode()}"
+alt = "Titration Curve"
+display.display(display.Markdown(F"![{alt}]({image})"))
+plt.close(fig)
