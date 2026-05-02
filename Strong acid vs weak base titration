@@ -1,0 +1,49 @@
+# Titration Curve Simulation with NumPy
+# Example: NH3 (weak base) vs HCl (strong acid)
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- Step 1: Define constants ---
+Kb = 1.8e-5   # base dissociation constant for NH3
+Kw = 1e-14    # water ion product
+Ka = Kw / Kb  # conjugate acid (NH4+) dissociation constant
+pKa = -np.log10(Ka)
+
+C_base = 0.1   # mol/L NH3
+V_base = 0.025 # L
+C_acid = 0.1   # mol/L HCl
+
+# --- Step 2: Create array of acid volumes ---
+vol_acid = np.linspace(0, 0.05, 500)  # 0 to 50 mL
+moles_base = C_base * V_base
+
+pH_values = []
+
+# --- Step 3: Calculate pH for each volume ---
+for Va in vol_acid:
+    moles_acid = C_acid * Va
+    if moles_acid < moles_base:
+        # Buffer region: weak base + conjugate acid
+        moles_NH3 = moles_base - moles_acid
+        moles_NH4 = moles_acid
+        pH = pKa + np.log10(moles_NH3/moles_NH4)
+    elif np.isclose(moles_acid, moles_base):
+        # Equivalence point: solution contains only NH4+
+        # Use Ka to find [H+]
+        conc_NH4 = moles_acid / (V_base + Va)
+        H_conc = np.sqrt(Ka * conc_NH4)
+        pH = -np.log10(H_conc)
+    else:
+        # Excess strong acid dominates
+        H_conc = (moles_acid - moles_base) / (V_base + Va)
+        pH = -np.log10(H_conc)
+    pH_values.append(pH)
+
+# --- Step 4: Plot titration curve ---
+plt.plot(vol_acid*1000, pH_values, color="red", linewidth=2)
+plt.xlabel("Volume of HCl added (mL)")
+plt.ylabel("pH")
+plt.title("Titration Curve: NH3 vs HCl")
+plt.grid(True)
+plt.show()
