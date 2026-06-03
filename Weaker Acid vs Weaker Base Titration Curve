@@ -1,0 +1,62 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def weak_acid_weak_base_titration(C_acid, V_acid, Ka, C_base, V_base, Kb, points=500):
+    """
+    Generate titration curve for weak acid vs weak base.
+    
+    Parameters:
+    C_acid : float - concentration of weak acid (mol/L)
+    V_acid : float - volume of weak acid (L)
+    Ka     : float - acid dissociation constant
+    C_base : float - concentration of weak base (mol/L)
+    V_base : float - max volume of base added (L)
+    Kb     : float - base dissociation constant
+    points : int   - number of points in curve
+    """
+    Kw = 1e-14
+    n_acid = C_acid * V_acid
+    pKa = -np.log10(Ka)
+    pKb = -np.log10(Kb)
+    pKw = 14
+    
+    Vb_range = np.linspace(0, V_base, points)
+    pH_values = []
+    
+    for Vb in Vb_range:
+        n_base = C_base * Vb
+        
+        if n_base < n_acid:  # Before equivalence
+            ratio = n_base / (n_acid - n_base)
+            pH = pKa + np.log10(ratio)  # Henderson-Hasselbalch approx
+        elif np.isclose(n_base, n_acid):  # Equivalence point
+            # At equivalence, solution contains conjugate acid and base
+            C_salt = n_acid / (V_acid + Vb)
+            # Amphiprotic salt: pH ≈ 0.5(pKa + pKb)
+            pH = 0.5 * (pKa + (pKw - pKb))
+        else:  # After equivalence
+            excess_base = (n_base - n_acid) / (V_acid + Vb)
+            pOH = -np.log10(excess_base)
+            pH = 14 - pOH
+        
+        pH_values.append(pH)
+    
+    # Plot
+    plt.figure(figsize=(8,6))
+    plt.plot(Vb_range*1000, pH_values, label="Titration Curve")
+    
+    V_eq = (n_acid/C_base)*1000
+    plt.axvline(V_eq, color='g', linestyle='--', label="Equivalence Point")
+    
+    plt.xlabel("Volume of base added (mL)")
+    plt.ylabel("pH")
+    plt.title("Weak Acid vs Weak Base Titration Curve")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+# Example: Acetic acid (Ka = 1.8e-5) vs Ammonia (Kb = 1.8e-5)
+weak_acid_weak_base_titration(
+    C_acid=0.1, V_acid=0.025, Ka=1.8e-5,
+    C_base=0.1, V_base=0.05, Kb=1.8e-5
+)
