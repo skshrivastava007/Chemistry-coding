@@ -1,0 +1,58 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def titration_curve_strong_base_weak_acid(C_base, V_base, C_acid, Ka, V_acid_max=0.05, points=500):
+    """
+    Generate titration curve for strong base vs weak acid.
+    
+    Parameters:
+    C_base : float - concentration of strong base (mol/L)
+    V_base : float - volume of strong base (L)
+    C_acid : float - concentration of weak acid (mol/L)
+    Ka     : float - acid dissociation constant
+    V_acid_max : float - max volume of acid added (L)
+    points : int - number of points in curve
+    """
+    Kw = 1e-14
+    n_base = C_base * V_base
+    pKa = -np.log10(Ka)
+    
+    V_acid = np.linspace(0, V_acid_max, points)
+    pH_values = []
+    
+    for Va in V_acid:
+        n_acid = C_acid * Va
+        
+        if n_acid < n_base:  # Buffer region (before equivalence)
+            ratio = (n_base - n_acid) / n_acid
+            pH = pKa + np.log10(ratio)
+        elif np.isclose(n_acid, n_base):  # Equivalence point
+            C_conj_acid = n_base / (V_base + Va)
+            H_conc = np.sqrt(Ka * C_conj_acid)
+            pH = -np.log10(H_conc)
+        else:  # After equivalence (excess weak acid)
+            excess_H = (n_acid - n_base) / (V_base + Va)
+            pH = -np.log10(excess_H)
+        
+        pH_values.append(pH)
+    
+    # Plot
+    plt.figure(figsize=(8,6))
+    plt.plot(V_acid*1000, pH_values, label="Titration Curve")
+    plt.axhline(pKa, color='r', linestyle='--', label=f"pKa = {pKa:.2f}")
+    
+    V_eq = (n_base/C_acid)*1000
+    plt.axvline(V_eq, color='g', linestyle='--', label="Equivalence Point")
+    
+    V_half_eq = V_eq / 2
+    plt.scatter(V_half_eq, pKa, color='purple', zorder=5, label="Half-Equivalence Point")
+    
+    plt.xlabel("Volume of Acid added (mL)")
+    plt.ylabel("pH")
+    plt.title("Strong Base vs Weak Acid Titration Curve")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+# Example: NaOH (0.1 M, 25 mL) titrated with acetic acid (Ka = 1.8e-5)
+titration_curve_strong_base_weak_acid(C_base=0.1, V_base=0.025, C_acid=0.1, Ka=1.8e-5)
