@@ -1,0 +1,60 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def weak_base_weak_acid_titration(C_base, V_base, Kb, C_acid, V_acid, Ka, points=500):
+    """
+    Generate titration curve for weak base vs weak acid.
+    
+    Parameters:
+    C_base : float - concentration of weak base (mol/L)
+    V_base : float - volume of weak base (L)
+    Kb     : float - base dissociation constant
+    C_acid : float - concentration of weak acid (mol/L)
+    V_acid : float - max volume of acid added (L)
+    Ka     : float - acid dissociation constant
+    points : int   - number of points in curve
+    """
+    Kw = 1e-14
+    n_base = C_base * V_base
+    pKa = -np.log10(Ka)
+    pKb = -np.log10(Kb)
+    pKw = 14
+    
+    Va_range = np.linspace(0, V_acid, points)
+    pH_values = []
+    
+    for Va in Va_range:
+        n_acid = C_acid * Va
+        
+        if n_acid < n_base:  # Before equivalence
+            ratio = n_acid / (n_base - n_acid)
+            pOH = pKb + np.log10(ratio)  # Henderson-Hasselbalch for base
+            pH = 14 - pOH
+        elif np.isclose(n_acid, n_base):  # Equivalence point
+            # Amphiprotic salt: pH ≈ 0.5(pKa + pKb)
+            pH = 0.5 * (pKa + (pKw - pKb))
+        else:  # After equivalence
+            excess_acid = (n_acid - n_base) / (V_base + Va)
+            pH = -np.log10(excess_acid)
+        
+        pH_values.append(pH)
+    
+    # Plot
+    plt.figure(figsize=(8,6))
+    plt.plot(Va_range*1000, pH_values, label="Titration Curve")
+    
+    V_eq = (n_base/C_acid)*1000
+    plt.axvline(V_eq, color='g', linestyle='--', label="Equivalence Point")
+    
+    plt.xlabel("Volume of acid added (mL)")
+    plt.ylabel("pH")
+    plt.title("Weak Base vs Weak Acid Titration Curve")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+# Example: Ammonia (Kb = 1.8e-5) vs Acetic acid (Ka = 1.8e-5)
+weak_base_weak_acid_titration(
+    C_base=0.1, V_base=0.025, Kb=1.8e-5,
+    C_acid=0.1, V_acid=0.05, Ka=1.8e-5
+)
