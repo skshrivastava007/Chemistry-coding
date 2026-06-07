@@ -1,0 +1,25 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+a0 = 0.529e-10  # Bohr radius in meters
+
+# Define the 1s wave function
+def psi_1s(r):
+    return (1/np.sqrt(np.pi * a0**3)) * np.exp(-r/a0)
+
+# Radial distance array (in meters)
+r = np.linspace(0, 5*a0, 500)
+
+# Compute wave function values
+psi_values = psi_1s(r)
+
+# Plot the wave function
+plt.figure(figsize=(7,5))
+plt.plot(r/a0, psi_values, label=r'$\psi_{1s}(r)$')
+plt.xlabel(r'$r/a_0$ (Bohr radii)')
+plt.ylabel('Wave function amplitude')
+plt.title('Hydrogen 1s Wave Function')
+plt.legend()
+plt.grid(True)
+plt.show()
