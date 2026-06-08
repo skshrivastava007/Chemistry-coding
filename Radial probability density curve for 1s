@@ -1,0 +1,25 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Bohr radius (in meters)
+a0 = 0.529e-10  
+
+# Hydrogen 1s probability density (|ψ|^2)
+def prob_density(r):
+    return (1/(np.pi * a0**3)) * np.exp(-2*r/a0)
+
+# Radial distances (in meters)
+r = np.linspace(0, 10*a0, 500)
+
+# Values
+density_vals = prob_density(r)
+
+# Plot
+plt.figure(figsize=(8,6))
+plt.plot(r/a0, density_vals, color='green', label=r'$|\psi_{1s}(r)|^2$')
+plt.xlabel(r'$r/a_0$ (Bohr radii)')
+plt.ylabel('Probability Density')
+plt.title('Hydrogen 1s Probability Density Function')
+plt.legend()
+plt.grid(True)
+plt.show()
