@@ -1,0 +1,27 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Bohr radius (in meters)
+a0 = 0.529e-10  
+
+# Radial probability function for hydrogen 1s
+def radial_prob_function(r):
+    # |ψ|^2 = (1/(π a0^3)) * exp(-2r/a0)
+    psi_sq = (1/(np.pi * a0**3)) * np.exp(-2*r/a0)
+    return 4*np.pi * r**2 * psi_sq   # P(r)
+
+# Radial distances (in meters)
+r = np.linspace(0, 10*a0, 500)
+
+# Values
+P_r = radial_prob_function(r)
+
+# Plot
+plt.figure(figsize=(8,6))
+plt.plot(r/a0, P_r, color='blue', label=r'$P(r)$')
+plt.xlabel(r'$r/a_0$ (Bohr radii)')
+plt.ylabel('Radial Probability Function')
+plt.title('Hydrogen 1s Radial Probability Function')
+plt.legend()
+plt.grid(True)
+plt.show()
